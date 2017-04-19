@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.app.web.dao.TAppInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.app.web.pojo.TAppInfo" >
+    <constructor >
+      <idArg column="id" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="os" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="env" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="appmode" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="version" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="branch_name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="des" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="gmt_create" jdbcType="BIGINT" javaType="java.lang.Long" />
+      <arg column="qrcode_url" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="file_url" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, os, env, appmode, version, branch_name, des, gmt_create, qrcode_url, file_url
+  </sql>
+
+  <!--获取最新记录-->
+  <select id="selectLatestRecord" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from t_appinfo
+    ORDER BY id DESC LIMIT 0,1
+  </select>
+
+  <!--无条件查询, 获取os,env,appmode,branchname 重复及未重复时，唯一的sql记录-->
+  <select id="queryAppInfoListForLatestWithoutCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    SELECT
+    *
+    FROM t_appinfo a
+    <where>
+      (a.os,a.env,a.appmode,a.branch_name) in (select os,env,appmode,branch_name from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) > 1)
+      and a.id in (select max(id) from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) > 1)
+      or (a.os,a.env,a.appmode,a.branch_name) in (select os,env,appmode,branch_name from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) = 1)
+    </where>
+    GROUP BY a.id
+    ORDER BY a.id DESC
+  </select>
+
+  <!--条件查询, 获取os,env,appmode,branchname 重复及未重复时，唯一的sql记录-->
+  <select id="queryAppInfoListForLatestWithCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    SELECT
+    *
+    FROM t_appinfo a
+    <where>
+      <if test="os != null" >
+        a.os = #{os,jdbcType=VARCHAR}
+      </if>
+      <if test="env != null" >
+        and a.env = #{env,jdbcType=VARCHAR}
+      </if>
+      <if test="appmode != null" >
+        and a.appmode = #{appmode,jdbcType=VARCHAR}
+      </if>
+      <if test="version != null" >
+        and a.version = #{version,jdbcType=INTEGER}
+      </if>
+      <if test="branchName != null" >
+        and a.branch_name = #{branchName,jdbcType=VARCHAR}
+      </if>
+      <if test="des != null" >
+        and a.des = #{des,jdbcType=VARCHAR}
+      </if>
+      <if test="gmtCreate != null" >
+        and a.gmt_create = #{gmtCreate,jdbcType=BIGINT}
+      </if>
+      and (os,env,appmode,branch_name) in (select os,env,appmode,branch_name from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) > 1)
+      and a.id in (select max(id) from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) > 1)
+      or
+      <if test="os != null" >
+        a.os = #{os,jdbcType=VARCHAR} and
+      </if>
+      <if test="env != null" >
+        a.env = #{env,jdbcType=VARCHAR} and
+      </if>
+      <if test="appmode != null" >
+        a.appmode = #{appmode,jdbcType=VARCHAR} and
+      </if>
+      <if test="version != null" >
+        a.version = #{version,jdbcType=INTEGER} and
+      </if>
+      <if test="branchName != null" >
+        a.branch_name = #{branchName,jdbcType=VARCHAR} and
+      </if>
+      <if test="des != null" >
+        a.des = #{des,jdbcType=VARCHAR} and
+      </if>
+      <if test="gmtCreate != null" >
+        a.gmt_create = #{gmtCreate,jdbcType=BIGINT} and
+      </if>
+        (os,env,appmode,branch_name) in (select os,env,appmode,branch_name from t_appinfo GROUP BY os,env,appmode,branch_name having count(*) = 1)
+    </where>
+    GROUP BY a.id
+    ORDER BY a.id DESC
+  </select>
+
+
+  <!--无条件查询，按分页查询-->
+  <select id="queryAppInfoListWithoutCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    SELECT
+    *
+    FROM t_appinfo
+    GROUP BY id
+    ORDER BY id DESC LIMIT #{pageIndex},#{pageSize}
+  </select>
+
+  <!--条件查询-->
+  <select id="queryAppInfoListWithCondition" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    SELECT
+    *
+    FROM t_appinfo
+    <where>
+      <if test="os != null" >
+        os = #{os,jdbcType=VARCHAR}
+      </if>
+      <if test="env != null" >
+        and env = #{env,jdbcType=VARCHAR}
+      </if>
+      <if test="appmode != null" >
+        and appmode = #{appmode,jdbcType=VARCHAR}
+      </if>
+      <if test="version != null" >
+        and version = #{version,jdbcType=INTEGER}
+      </if>
+      <if test="branchName != null" >
+        and branch_name = #{branchName,jdbcType=VARCHAR}
+      </if>
+      <if test="des != null" >
+        and des = #{des,jdbcType=VARCHAR}
+      </if>
+      <if test="gmtCreate != null" >
+        and gmt_create = #{gmtCreate,jdbcType=BIGINT}
+      </if>
+    </where>
+    GROUP BY id
+    ORDER BY id DESC LIMIT #{pageIndex},#{pageSize}
+  </select>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_appinfo
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_appinfo
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.app.web.pojo.TAppInfo" >
+    insert into t_appinfo (id, os, env, appmode,
+      version, branch_name, des, 
+      gmt_create, qrcode_url, file_url
+      )
+    values (#{id,jdbcType=BIGINT}, #{os,jdbcType=VARCHAR}, #{env,jdbcType=VARCHAR}, #{appmode,jdbcType=VARCHAR},
+      #{version,jdbcType=INTEGER}, #{branchName,jdbcType=VARCHAR}, #{des,jdbcType=VARCHAR}, 
+      #{gmtCreate,jdbcType=BIGINT}, #{qrcodeUrl,jdbcType=VARCHAR}, #{fileUrl,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.app.web.pojo.TAppInfo" >
+    insert into t_appinfo
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="os != null" >
+        os,
+      </if>
+      <if test="env != null" >
+        env,
+      </if>
+      <if test="appmode != null" >
+        appmode,
+      </if>
+      <if test="version != null" >
+        version,
+      </if>
+      <if test="branchName != null" >
+        branch_name,
+      </if>
+      <if test="des != null" >
+        des,
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create,
+      </if>
+      <if test="qrcodeUrl != null" >
+        qrcode_url,
+      </if>
+      <if test="fileUrl != null" >
+        file_url,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="os != null" >
+        #{os,jdbcType=VARCHAR},
+      </if>
+      <if test="env != null" >
+        #{env,jdbcType=VARCHAR},
+      </if>
+      <if test="appmode != null" >
+        #{appmode,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="branchName != null" >
+        #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="des != null" >
+        #{des,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        #{gmtCreate,jdbcType=BIGINT},
+      </if>
+      <if test="qrcodeUrl != null" >
+        #{qrcodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null" >
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.app.web.pojo.TAppInfo" >
+    update t_appinfo
+    <set >
+      <if test="os != null" >
+        os = #{os,jdbcType=VARCHAR},
+      </if>
+      <if test="env != null" >
+        env = #{env,jdbcType=VARCHAR},
+      </if>
+      <if test="appmode != null" >
+        appmode = #{appmode,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null" >
+        version = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="branchName != null" >
+        branch_name = #{branchName,jdbcType=VARCHAR},
+      </if>
+      <if test="des != null" >
+        des = #{des,jdbcType=VARCHAR},
+      </if>
+      <if test="gmtCreate != null" >
+        gmt_create = #{gmtCreate,jdbcType=BIGINT},
+      </if>
+      <if test="qrcodeUrl != null" >
+        qrcode_url = #{qrcodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null" >
+        file_url = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.app.web.pojo.TAppInfo" >
+    update t_appinfo
+    set os = #{os,jdbcType=VARCHAR},
+      env = #{env,jdbcType=VARCHAR},
+      appmode = #{appmode,jdbcType=VARCHAR},
+      version = #{version,jdbcType=INTEGER},
+      branch_name = #{branchName,jdbcType=VARCHAR},
+      des = #{des,jdbcType=VARCHAR},
+      gmt_create = #{gmtCreate,jdbcType=BIGINT},
+      qrcode_url = #{qrcodeUrl,jdbcType=VARCHAR},
+      file_url = #{fileUrl,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
