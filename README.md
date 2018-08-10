@@ -14,10 +14,10 @@ App发布平台
 目前已在公司内部推行，并集成到了Jenkins上
 
 # 效果
-![](/uploads/photo/2017/db4f4437-e5d2-41c9-a432-12d9625ff572.png!large)
+https://testerhome.com/uploads/photo/2017/db4f4437-e5d2-41c9-a432-12d9625ff572.png!large
 
 # 业务流
-![](/uploads/photo/2017/9ad36f55-91f2-4476-884a-f5bc811a0cae.png!large)
+https://testerhome.com/uploads/photo/2017/9ad36f55-91f2-4476-884a-f5bc811a0cae.png!large
 
 # 实现
 ##创建本地数据库
